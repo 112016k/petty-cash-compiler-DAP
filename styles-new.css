@@ -132,7 +132,7 @@ body.dark-mode tr:hover {
 /* Toggle dark mode button */
 .toggle-dark-mode-btn {
     position: fixed;
-    top: 60px; /* ensures it doesn't block your heading */
+    top: 30px; /* ensures it doesn't block your heading */
     right: 20px;
     padding: 10px 15px;
     border-radius: 6px;

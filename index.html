@@ -6,10 +6,9 @@
     <title>Petty Cash Compiler - Multi Account</title>
     <link rel="stylesheet" href="styles-new.css" />
 </head>
-
 <body>
     <h1>Petty Cash Compiler</h1>
-    <p>Track expenses & balances.</p>
+    <p>Track expenses & balances for multiple petty cash accounts.</p>
 
     <div class="setup">
         <label>Select Account:</label>
@@ -38,34 +37,6 @@
         <p><strong>Remaining Balance:</strong> ₱<span id="remaining">0.00</span></p>
     </div>
 
-    <div class="setup">
-        <button onclick="resetAccount()" style="
-            background: #e74c3c;
-            color: white;
-            padding: 12px;
-            width: 100%;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-        ">Reset Current Account</button>
-    </div>
-
-    <div class="setup">
-        <h3>Add Petty Cash to Current Account</h3>
-        <input type="number" id="addCashAmount" placeholder="Amount to add" />
-        <button onclick="addPettyCash()" style="
-            background: #27ae60;
-            color: white;
-            padding: 12px;
-            width: 100%;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-        ">Add Cash</button>
-    </div>
-
     <table>
         <thead>
             <tr><th>Date</th><th>Description</th><th>Amount</th></tr>
@@ -73,18 +44,7 @@
         <tbody id="expenseTable"></tbody>
     </table>
 
-    <button onclick="toggleDarkMode()" style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 10px 15px;
-        border-radius: 6px;
-        border: none;
-        background: #3498db;
-        color: white;
-        cursor: pointer;
-        z-index: 1000;
-    ">Toggle Dark Mode</button>
+    <button class="toggle-dark-mode-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
 
     <script>
         let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
@@ -201,37 +161,6 @@
             const remaining = accounts[currentAccount].startingCash - totalSpent;
             document.getElementById('totalSpent').textContent = totalSpent.toFixed(2);
             document.getElementById('remaining').textContent = remaining.toFixed(2);
-        }
-
-        function resetAccount() {
-            if (!currentAccount) {
-                alert('Please select an account first.');
-                return;
-            }
-            if (confirm(`Are you sure you want to reset account "${currentAccount}"? This will clear all expenses and set balance to 0.`)) {
-                accounts[currentAccount] = {
-                    startingCash: 0,
-                    expenses: []
-                };
-                localStorage.setItem('accounts', JSON.stringify(accounts));
-                updateUI();
-            }
-        }
-
-        function addPettyCash() {
-            if (!currentAccount) {
-                alert('Please select an account first.');
-                return;
-            }
-            const amount = parseFloat(document.getElementById('addCashAmount').value);
-            if (isNaN(amount) || amount <= 0) {
-                alert('Please enter a valid positive amount.');
-                return;
-            }
-            accounts[currentAccount].startingCash += amount;
-            localStorage.setItem('accounts', JSON.stringify(accounts));
-            updateUI();
-            document.getElementById('addCashAmount').value = '';
         }
 
         function toggleDarkMode() {

@@ -86,19 +86,3 @@ th, td {
     padding: 12px;
     border-bottom: 1px solid #eee;
     text-align: left;
-}
-
-th {
-    background: #3498db;
-    color: white;
-}
-
-tr:hover {
-    background: #f1f1f1;
-}
-
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-}

@@ -124,3 +124,8 @@ body.dark-mode select {
 body.dark-mode th {
     background: #40739e;
 }
+
+/* Toggle button */
+.toggle-dark-mode-btn {
+    position: fixed;
+    top: 60px; /* lower so it doesn't block your heading */

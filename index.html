@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Petty Cash Compiler</h1>
-    <p>Track expenses & balances.                                  </p>
+    <p>Track expenses & balances for multiple petty cash accounts.</p>
 
     <div class="setup">
         <label>Select Account:</label>
@@ -31,6 +31,12 @@
         <input type="number" id="amount" placeholder="Amount" required />
         <button type="submit">Add Expense</button>
     </form>
+
+    <div class="setup">
+        <h3>Manage Account</h3>
+        <button onclick="addPettyCash()">Add Petty Cash</button>
+        <button onclick="resetCurrentAccount()">Reset This Account</button>
+    </div>
 
     <div class="summary">
         <p><strong>Total Spent:</strong> ₱<span id="totalSpent">0.00</span></p>
@@ -75,22 +81,15 @@
         function createAccount() {
             const name = document.getElementById('newAccountName').value.trim();
             const cash = parseFloat(document.getElementById('newAccountCash').value);
-
             if (!name || isNaN(cash)) {
                 alert('Please provide valid account name and starting cash.');
                 return;
             }
-
             if (accounts[name]) {
                 alert('Account already exists!');
                 return;
             }
-
-            accounts[name] = {
-                startingCash: cash,
-                expenses: []
-            };
-
+            accounts[name] = { startingCash: cash, expenses: [] };
             localStorage.setItem('accounts', JSON.stringify(accounts));
             currentAccount = name;
             loadAccountOptions();
@@ -117,11 +116,9 @@
                 alert('Please select an account first.');
                 return;
             }
-
             const date = document.getElementById('date').value;
             const description = document.getElementById('description').value;
             const amount = parseFloat(document.getElementById('amount').value);
-
             if (date && description && !isNaN(amount)) {
                 accounts[currentAccount].expenses.push({ date, description, amount });
                 localStorage.setItem('accounts', JSON.stringify(accounts));
@@ -129,6 +126,33 @@
                 e.target.reset();
             } else {
                 alert('Please fill all fields correctly.');
+            }
+        }
+
+        function addPettyCash() {
+            if (!currentAccount) {
+                alert('Please select an account first.');
+                return;
+            }
+            const addAmount = parseFloat(prompt("Enter amount to add to petty cash:"));
+            if (!isNaN(addAmount) && addAmount > 0) {
+                accounts[currentAccount].startingCash += addAmount;
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                updateUI();
+            } else {
+                alert("Invalid amount.");
+            }
+        }
+
+        function resetCurrentAccount() {
+            if (!currentAccount) {
+                alert('Please select an account first.');
+                return;
+            }
+            if (confirm(`Reset account ${currentAccount}? This will clear all expenses.`)) {
+                accounts[currentAccount].expenses = [];
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                updateUI();
             }
         }
 

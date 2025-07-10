@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Petty Cash Compiler - Multi Account</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <h1>Petty Cash Compiler</h1>
+    <p>Track expenses & balances for multiple petty cash accounts.</p>
+
+    <div class="setup">
+        <label>Select Account:</label>
+        <select id="accountSelect" onchange="switchAccount()">
+            <option value="">-- Select Account --</option>
+        </select>
+    </div>
+
+    <div class="setup">
+        <h3>Create New Account</h3>
+        <input type="text" id="newAccountName" placeholder="Account name (e.g. A1)" />
+        <input type="number" id="newAccountCash" placeholder="Starting cash" />
+        <button onclick="createAccount()">Create Account</button>
+    </div>
+
+    <form onsubmit="addExpense(event)">
+        <h3>Add Expense</h3>
+        <input type="date" id="date" required />
+        <input type="text" id="description" placeholder="Description" required />
+        <input type="number" id="amount" placeholder="Amount" required />
+        <button type="submit">Add Expense</button>
+    </form>
+
+    <div class="summary">
+        <p><strong>Total Spent:</strong> ₱<span id="totalSpent">0.00</span></p>
+        <p><strong>Remaining Balance:</strong> ₱<span id="remaining">0.00</span></p>
+    </div>
+
+    <table>
+        <thead>
+            <tr><th>Date</th><th>Description</th><th>Amount</th></tr>
+        </thead>
+        <tbody id="expenseTable"></tbody>
+    </table>
+
+    <button onclick="downloadCSV()" style="margin-top: 10px;">Download as CSV</button>
+
+    <button class="toggle-dark-mode-btn" onclick="toggleDarkMode()">🌙</button>
+
+    <script>
+        let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+        let currentAccount = null;
+
+        window.onload = function() {
+            loadAccountOptions();
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        };
+
+        function loadAccountOptions() {
+            const select = document.getElementById('accountSelect');
+            select.innerHTML = '<option value="">-- Select Account --</option>';
+            for (let accountName in accounts) {
+                const option = document.createElement('option');
+                option.value = accountName;
+                option.textContent = accountName;
+                select.appendChild(option);
+            }
+            if (currentAccount && accounts[currentAccount]) {
+                select.value = currentAccount;
+                updateUI();
+            }
+        }
+
+        function createAccount() {
+            const name = document.getElementById('newAccountName').value.trim();
+            const cash = parseFloat(document.getElementById('newAccountCash').value);
+            if (!name || isNaN(cash)) {
+                alert('Please provide valid account name and starting cash.');
+                return;
+            }
+            if (accounts[name]) {
+                alert('Account already exists!');
+                return;
+            }
+            accounts[name] = { startingCash: cash, expenses: [] };
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            currentAccount = name;
+            loadAccountOptions();
+            document.getElementById('accountSelect').value = name;
+            updateUI();
+            document.getElementById('newAccountName').value = '';
+            document.getElementById('newAccountCash').value = '';
+        }
+
+        function switchAccount() {
+            const selected = document.getElementById('accountSelect').value;
+            if (selected && accounts[selected]) {
+                currentAccount = selected;
+                updateUI();
+            } else {
+                currentAccount = null;
+                clearUI();
+            }
+        }
+
+        function addExpense(e) {
+            e.preventDefault();
+            if (!currentAccount) {
+                alert('Please select an account first.');
+                return;
+            }
+            const date = document.getElementById('date').value;
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            if (date && description && !isNaN(amount)) {
+                accounts[currentAccount].expenses.push({ date, description, amount });
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                updateUI();
+                e.target.reset();
+            } else {
+                alert('Please fill all fields correctly.');
+            }
+        }
+
+        function updateUI() {
+            updateTable();
+            updateSummary();
+        }
+
+        function clearUI() {
+            document.getElementById('expenseTable').innerHTML = '';
+            document.getElementById('totalSpent').textContent = '0.00';
+            document.getElementById('remaining').textContent = '0.00';
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('expenseTable');
+            tbody.innerHTML = '';
+            accounts[currentAccount].expenses.forEach(exp => {
+                tbody.innerHTML += `<tr>
+                    <td>${exp.date}</td>
+                    <td>${exp.description}</td>
+                    <td>₱${exp.amount.toFixed(2)}</td>
+                </tr>`;
+            });
+        }
+
+        function updateSummary() {
+            const totalSpent = accounts[currentAccount].expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const remaining = accounts[currentAccount].startingCash - totalSpent;
+            document.getElementById('totalSpent').textContent = totalSpent.toFixed(2);
+            document.getElementById('remaining').textContent = remaining.toFixed(2);
+        }
+
+        function downloadCSV() {
+            if (!currentAccount) {
+                alert("Select an account first.");
+                return;
+            }
+            const rows = [["Date", "Description", "Amount"]];
+            accounts[currentAccount].expenses.forEach(exp => {
+                rows.push([exp.date, exp.description, exp.amount]);
+            });
+            let csvContent = "data:text/csv;charset=utf-8," 
+                + rows.map(e => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", currentAccount + "_expenses.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+    </script>
+</body>
+</html>

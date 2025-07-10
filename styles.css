@@ -86,3 +86,48 @@ th, td {
     padding: 12px;
     border-bottom: 1px solid #eee;
     text-align: left;
+}
+
+th {
+    background: #3498db;
+    color: white;
+}
+
+tr:hover {
+    background: #f1f1f1;
+}
+
+/* ✅ DARK MODE styles */
+body.dark-mode {
+    background: #1e272e;
+    color: #f5f6fa;
+}
+
+body.dark-mode form, 
+body.dark-mode .setup, 
+body.dark-mode .summary, 
+body.dark-mode table {
+    background: #2f3640;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode input,
+body.dark-mode select {
+    background: #3d3d3d;
+    color: #f5f6fa;
+    border: 1px solid #555;
+}
+
+body.dark-mode th, body.dark-mode td {
+    border-bottom: 1px solid #555;
+}
+
+body.dark-mode tr:hover {
+    background: #414141;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+}

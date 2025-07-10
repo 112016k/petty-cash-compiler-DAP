@@ -1,15 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Petty Cash Compiler - Multi Account</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Petty Cash Compiler</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Petty Cash Compiler</h1>
-    <p>Track expenses & balances for multiple petty cash accounts.</p>
+    <p>Track multiple petty cash accounts with expenses.</p>
 
     <div class="setup">
         <label>Select Account:</label>
@@ -23,6 +22,15 @@
         <input type="text" id="newAccountName" placeholder="Account name (e.g. A1)" />
         <input type="number" id="newAccountCash" placeholder="Starting cash" />
         <button onclick="createAccount()">Create Account</button>
+    </div>
+
+    <div class="setup">
+        <h3>Manage Account</h3>
+        <input type="number" id="addCashAmount" placeholder="Amount to add" />
+        <button onclick="addCash()">Add Cash</button>
+        <button onclick="resetRecent()">Reset Expenses</button>
+        <button onclick="resetAll()">Reset All (Balance & Expenses)</button>
+        <button onclick="deleteAccount()">Delete Account</button>
     </div>
 
     <form onsubmit="addExpense(event)">
@@ -45,49 +53,40 @@
         <tbody id="expenseTable"></tbody>
     </table>
 
-    <button onclick="downloadCSV()" style="margin-top: 10px;">Download as CSV</button>
+    <button onclick="downloadCSV()" class="download-btn">Download CSV</button>
 
-    <button class="toggle-dark-mode-btn" onclick="toggleDarkMode()">🌙</button>
+    <button onclick="toggleDarkMode()" class="toggle-dark-mode-btn">🌙</button>
 
     <script>
         let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
         let currentAccount = null;
 
-        window.onload = function() {
-            loadAccountOptions();
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body.classList.add('dark-mode');
-            }
-        };
+        window.onload = () => loadAccountOptions();
 
         function loadAccountOptions() {
             const select = document.getElementById('accountSelect');
             select.innerHTML = '<option value="">-- Select Account --</option>';
-            for (let accountName in accounts) {
-                const option = document.createElement('option');
-                option.value = accountName;
-                option.textContent = accountName;
-                select.appendChild(option);
+            for (let name in accounts) {
+                let opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                select.appendChild(opt);
             }
             if (currentAccount && accounts[currentAccount]) {
                 select.value = currentAccount;
                 updateUI();
+            } else {
+                clearUI();
             }
         }
 
         function createAccount() {
             const name = document.getElementById('newAccountName').value.trim();
             const cash = parseFloat(document.getElementById('newAccountCash').value);
-            if (!name || isNaN(cash)) {
-                alert('Please provide valid account name and starting cash.');
-                return;
-            }
-            if (accounts[name]) {
-                alert('Account already exists!');
-                return;
-            }
+            if (!name || isNaN(cash)) return alert("Provide valid account name & cash.");
+            if (accounts[name]) return alert("Account exists!");
             accounts[name] = { startingCash: cash, expenses: [] };
-            localStorage.setItem('accounts', JSON.stringify(accounts));
+            save();
             currentAccount = name;
             loadAccountOptions();
             document.getElementById('accountSelect').value = name;
@@ -97,33 +96,52 @@
         }
 
         function switchAccount() {
-            const selected = document.getElementById('accountSelect').value;
-            if (selected && accounts[selected]) {
-                currentAccount = selected;
-                updateUI();
-            } else {
-                currentAccount = null;
-                clearUI();
-            }
+            currentAccount = document.getElementById('accountSelect').value;
+            if (currentAccount) updateUI();
+            else clearUI();
+        }
+
+        function addCash() {
+            if (!currentAccount) return alert("Select an account first.");
+            let amt = parseFloat(document.getElementById('addCashAmount').value);
+            if (isNaN(amt)) return alert("Enter valid amount.");
+            accounts[currentAccount].startingCash += amt;
+            save(); updateUI();
+            document.getElementById('addCashAmount').value = '';
         }
 
         function addExpense(e) {
             e.preventDefault();
-            if (!currentAccount) {
-                alert('Please select an account first.');
-                return;
-            }
+            if (!currentAccount) return alert("Select an account.");
             const date = document.getElementById('date').value;
-            const description = document.getElementById('description').value;
-            const amount = parseFloat(document.getElementById('amount').value);
-            if (date && description && !isNaN(amount)) {
-                accounts[currentAccount].expenses.push({ date, description, amount });
-                localStorage.setItem('accounts', JSON.stringify(accounts));
-                updateUI();
-                e.target.reset();
-            } else {
-                alert('Please fill all fields correctly.');
-            }
+            const desc = document.getElementById('description').value;
+            const amt = parseFloat(document.getElementById('amount').value);
+            if (!date || !desc || isNaN(amt)) return alert("Fill fields correctly.");
+            accounts[currentAccount].expenses.push({ date, description: desc, amount: amt });
+            save(); updateUI();
+            e.target.reset();
+        }
+
+        function resetRecent() {
+            if (!currentAccount) return alert("Select an account.");
+            if (!confirm("Reset only expenses?")) return;
+            accounts[currentAccount].expenses = [];
+            save(); updateUI();
+        }
+
+        function resetAll() {
+            if (!currentAccount) return alert("Select an account.");
+            if (!confirm("Reset ALL (balance & expenses)?")) return;
+            accounts[currentAccount] = { startingCash: 0, expenses: [] };
+            save(); updateUI();
+        }
+
+        function deleteAccount() {
+            if (!currentAccount) return alert("Select an account.");
+            if (!confirm(`Delete account ${currentAccount}?`)) return;
+            delete accounts[currentAccount];
+            currentAccount = null;
+            save(); loadAccountOptions();
         }
 
         function updateUI() {
@@ -141,45 +159,40 @@
             const tbody = document.getElementById('expenseTable');
             tbody.innerHTML = '';
             accounts[currentAccount].expenses.forEach(exp => {
-                tbody.innerHTML += `<tr>
-                    <td>${exp.date}</td>
-                    <td>${exp.description}</td>
-                    <td>₱${exp.amount.toFixed(2)}</td>
-                </tr>`;
+                tbody.innerHTML += `<tr><td>${exp.date}</td><td>${exp.description}</td><td>₱${exp.amount.toFixed(2)}</td></tr>`;
             });
         }
 
         function updateSummary() {
-            const totalSpent = accounts[currentAccount].expenses.reduce((sum, exp) => sum + exp.amount, 0);
-            const remaining = accounts[currentAccount].startingCash - totalSpent;
-            document.getElementById('totalSpent').textContent = totalSpent.toFixed(2);
-            document.getElementById('remaining').textContent = remaining.toFixed(2);
+            const spent = accounts[currentAccount].expenses.reduce((s,e)=>s+e.amount,0);
+            const remain = accounts[currentAccount].startingCash - spent;
+            document.getElementById('totalSpent').textContent = spent.toFixed(2);
+            document.getElementById('remaining').textContent = remain.toFixed(2);
+        }
+
+        function save() {
+            localStorage.setItem('accounts', JSON.stringify(accounts));
         }
 
         function downloadCSV() {
-            if (!currentAccount) {
-                alert("Select an account first.");
-                return;
+            let csv = "Account,Date,Description,Amount\n";
+            for (let acc in accounts) {
+                accounts[acc].expenses.forEach(e => {
+                    csv += `${acc},${e.date},${e.description},${e.amount}\n`;
+                });
             }
-            const rows = [["Date", "Description", "Amount"]];
-            accounts[currentAccount].expenses.forEach(exp => {
-                rows.push([exp.date, exp.description, exp.amount]);
-            });
-            let csvContent = "data:text/csv;charset=utf-8," 
-                + rows.map(e => e.join(",")).join("\n");
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", currentAccount + "_expenses.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            let blob = new Blob([csv], {type:"text/csv"});
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "petty-cash-data.csv";
+            a.click();
         }
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
         }
+        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
     </script>
 </body>
 </html>

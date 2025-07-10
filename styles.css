@@ -14,7 +14,6 @@ body {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    transition: background 0.3s, color 0.3s;
 }
 
 h1 {
@@ -98,29 +97,24 @@ tr:hover {
     background: #f1f1f1;
 }
 
-/* Button enhancements for add cash / reset */
-.setup button {
-    transition: background 0.3s, transform 0.2s;
-}
-.setup button:hover {
-    transform: translateY(-2px);
-}
-
-button[onclick*="resetAccount"] {
-    background: #e74c3c;
-}
-button[onclick*="resetAccount"]:hover {
-    background: #c0392b;
-}
-
-button[onclick*="addPettyCash"] {
+/* Add Cash and Reset styles */
+.addCashBtn {
     background: #27ae60;
 }
-button[onclick*="addPettyCash"]:hover {
+
+.addCashBtn:hover {
     background: #1e8449;
 }
 
-/* Dark mode adjustments */
+.resetBtn {
+    background: #e74c3c;
+}
+
+.resetBtn:hover {
+    background: #c0392b;
+}
+
+/* Dark mode styles */
 body.dark-mode {
     background: #1e272e;
     color: #f5f6fa;
@@ -131,7 +125,6 @@ body.dark-mode .setup,
 body.dark-mode .summary, 
 body.dark-mode table {
     background: #2f3640;
-    color: #f5f6fa;
 }
 
 body.dark-mode input,
@@ -143,13 +136,13 @@ body.dark-mode select {
 
 body.dark-mode th {
     background: #3498db;
-    color: white;
 }
 
 body.dark-mode tr:hover {
-    background: #3b3b3b;
+    background: #3a3a3a;
 }
 
+/* Responsive tweaks */
 @media (max-width: 600px) {
     body {
         padding: 10px;

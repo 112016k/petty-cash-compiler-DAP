@@ -125,7 +125,33 @@ body.dark-mode th {
     background: #40739e;
 }
 
-/* Toggle button */
+body.dark-mode tr:hover {
+    background: #353b48;
+}
+
+/* Toggle dark mode button */
 .toggle-dark-mode-btn {
     position: fixed;
-    top: 5px; /* lower so it doesn't block your heading */
+    top: 60px; /* ensures it doesn't block your heading */
+    right: 20px;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: none;
+    background: #3498db;
+    color: white;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: background 0.3s;
+}
+
+.toggle-dark-mode-btn:hover {
+    background: #2980b9;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+}

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Petty Cash Compiler - Multi Account</title>
-    <link rel="stylesheet" href="styles-new.css" />
+    <title>Petty Cash Compiler -Phillogix,Ideasrv,Apsoft</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <h1>Petty Cash Compiler</h1>
@@ -37,6 +37,12 @@
         <p><strong>Remaining Balance:</strong> ₱<span id="remaining">0.00</span></p>
     </div>
 
+    <div class="setup">
+        <h3>Account Options</h3>
+        <button onclick="resetLastExpense()">Reset Last Expense</button>
+        <button onclick="resetAccount()">Reset Whole Account</button>
+    </div>
+
     <table>
         <thead>
             <tr><th>Date</th><th>Description</th><th>Amount</th></tr>
@@ -44,177 +50,135 @@
         <tbody id="expenseTable"></tbody>
     </table>
 
-    <button onclick="resetCurrentAccount()" style="
-        display: block;
-        margin: 20px auto;
-        padding: 12px 20px;
-        border-radius: 6px;
-        border: none;
-        background: #e74c3c;
-        color: white;
-        cursor: pointer;
-        font-size: 16px;
-    ">Reset Account</button>
+    <script>
+        let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+        let currentAccount = null;
 
-    <button onclick="toggleDarkMode()" class="toggle-dark-mode-btn">Toggle Dark Mode</button>
-
-<script>
-    let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
-    let currentAccount = null;
-
-    window.onload = function() {
-        loadAccountOptions();
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
-    };
-
-    function loadAccountOptions() {
-        const select = document.getElementById('accountSelect');
-        select.innerHTML = '<option value="">-- Select Account --</option>';
-        for (let accountName in accounts) {
-            const option = document.createElement('option');
-            option.value = accountName;
-            option.textContent = accountName;
-            select.appendChild(option);
-        }
-        if (currentAccount && accounts[currentAccount]) {
-            select.value = currentAccount;
-            updateUI();
-        }
-    }
-
-    function createAccount() {
-        const name = document.getElementById('newAccountName').value.trim();
-        const cash = parseFloat(document.getElementById('newAccountCash').value);
-
-        if (!name || isNaN(cash)) {
-            alert('Please provide valid account name and starting cash.');
-            return;
-        }
-
-        if (accounts[name]) {
-            alert('Account already exists!');
-            return;
-        }
-
-        accounts[name] = {
-            startingCash: cash,
-            expenses: []
+        window.onload = function() {
+            loadAccountOptions();
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
         };
 
-        localStorage.setItem('accounts', JSON.stringify(accounts));
-        currentAccount = name;
-        loadAccountOptions();
-        document.getElementById('accountSelect').value = name;
-        updateUI();
-        document.getElementById('newAccountName').value = '';
-        document.getElementById('newAccountCash').value = '';
-    }
-
-    function switchAccount() {
-        const selected = document.getElementById('accountSelect').value;
-        if (selected && accounts[selected]) {
-            currentAccount = selected;
-            updateUI();
-        } else {
-            currentAccount = null;
-            clearUI();
-        }
-    }
-
-    function addExpense(e) {
-        e.preventDefault();
-        if (!currentAccount) {
-            alert('Please select an account first.');
-            return;
+        function loadAccountOptions() {
+            const select = document.getElementById('accountSelect');
+            select.innerHTML = '<option value="">-- Select Account --</option>';
+            for (let name in accounts) {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            }
+            if (currentAccount && accounts[currentAccount]) {
+                select.value = currentAccount;
+                updateUI();
+            }
         }
 
-        const date = document.getElementById('date').value;
-        const description = document.getElementById('description').value;
-        const amount = parseFloat(document.getElementById('amount').value);
+        function createAccount() {
+            const name = document.getElementById('newAccountName').value.trim();
+            const cash = parseFloat(document.getElementById('newAccountCash').value);
 
-        if (date && description && !isNaN(amount)) {
-            accounts[currentAccount].expenses.push({ date, description, amount });
+            if (!name || isNaN(cash)) {
+                alert('Please provide valid account name and starting cash.');
+                return;
+            }
+            if (accounts[name]) {
+                alert('Account already exists!');
+                return;
+            }
+
+            accounts[name] = { startingCash: cash, expenses: [] };
             localStorage.setItem('accounts', JSON.stringify(accounts));
+            currentAccount = name;
+            loadAccountOptions();
+            document.getElementById('accountSelect').value = name;
             updateUI();
-            e.target.reset();
-        } else {
-            alert('Please fill all fields correctly.');
-        }
-    }
-
-    function resetCurrentAccount() {
-        if (!currentAccount) {
-            alert('Please select an account first.');
-            return;
+            document.getElementById('newAccountName').value = '';
+            document.getElementById('newAccountCash').value = '';
         }
 
-        const choice = prompt(
-            `Reset options for ${currentAccount}:\n` +
-            "1 - Reset only expenses\n" +
-            "2 - Reset all (expenses + set new starting cash)\n\n" +
-            "Enter 1 or 2:"
-        );
+        function switchAccount() {
+            const selected = document.getElementById('accountSelect').value;
+            currentAccount = accounts[selected] ? selected : null;
+            currentAccount ? updateUI() : clearUI();
+        }
 
-        if (choice === "1") {
-            accounts[currentAccount].expenses = [];
-            localStorage.setItem('accounts', JSON.stringify(accounts));
-            updateUI();
-            alert(`Expenses cleared for ${currentAccount}.`);
-        } else if (choice === "2") {
-            let newCash = parseFloat(prompt("Enter new starting cash:"));
-            if (!isNaN(newCash) && newCash >= 0) {
-                accounts[currentAccount] = {
-                    startingCash: newCash,
-                    expenses: []
-                };
+        function addExpense(e) {
+            e.preventDefault();
+            if (!currentAccount) {
+                alert('Please select an account first.');
+                return;
+            }
+            const date = document.getElementById('date').value;
+            const desc = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (date && desc && !isNaN(amount)) {
+                accounts[currentAccount].expenses.push({ date, description: desc, amount });
                 localStorage.setItem('accounts', JSON.stringify(accounts));
                 updateUI();
-                alert(`${currentAccount} has been reset with new starting cash ₱${newCash.toFixed(2)}.`);
+                e.target.reset();
             } else {
-                alert("Invalid amount. Reset cancelled.");
+                alert('Please fill all fields correctly.');
             }
-        } else {
-            alert("Reset cancelled.");
         }
-    }
 
-    function updateUI() {
-        updateTable();
-        updateSummary();
-    }
+        function updateUI() {
+            updateTable();
+            updateSummary();
+        }
 
-    function clearUI() {
-        document.getElementById('expenseTable').innerHTML = '';
-        document.getElementById('totalSpent').textContent = '0.00';
-        document.getElementById('remaining').textContent = '0.00';
-    }
+        function clearUI() {
+            document.getElementById('expenseTable').innerHTML = '';
+            document.getElementById('totalSpent').textContent = '0.00';
+            document.getElementById('remaining').textContent = '0.00';
+        }
 
-    function updateTable() {
-        const tbody = document.getElementById('expenseTable');
-        tbody.innerHTML = '';
-        accounts[currentAccount].expenses.forEach(exp => {
-            const row = `<tr>
-                <td>${exp.date}</td>
-                <td>${exp.description}</td>
-                <td>₱${exp.amount.toFixed(2)}</td>
-            </tr>`;
-            tbody.innerHTML += row;
-        });
-    }
+        function updateTable() {
+            const tbody = document.getElementById('expenseTable');
+            tbody.innerHTML = '';
+            accounts[currentAccount].expenses.forEach(exp => {
+                tbody.innerHTML += `<tr>
+                    <td>${exp.date}</td>
+                    <td>${exp.description}</td>
+                    <td>₱${exp.amount.toFixed(2)}</td>
+                </tr>`;
+            });
+        }
 
-    function updateSummary() {
-        const totalSpent = accounts[currentAccount].expenses.reduce((sum, exp) => sum + exp.amount, 0);
-        const remaining = accounts[currentAccount].startingCash - totalSpent;
-        document.getElementById('totalSpent').textContent = totalSpent.toFixed(2);
-        document.getElementById('remaining').textContent = remaining.toFixed(2);
-    }
+        function updateSummary() {
+            const total = accounts[currentAccount].expenses.reduce((sum, e) => sum + e.amount, 0);
+            const remain = accounts[currentAccount].startingCash - total;
+            document.getElementById('totalSpent').textContent = total.toFixed(2);
+            document.getElementById('remaining').textContent = remain.toFixed(2);
+        }
 
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    }
-</script>
+        function resetLastExpense() {
+            if (!currentAccount || accounts[currentAccount].expenses.length === 0) return;
+            if (confirm("Are you sure you want to remove the most recent expense?")) {
+                accounts[currentAccount].expenses.pop();
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                updateUI();
+            }
+        }
+
+        function resetAccount() {
+            if (!currentAccount) return;
+            if (confirm("Are you sure you want to clear ALL expenses and reset balance?")) {
+                accounts[currentAccount].expenses = [];
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                updateUI();
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+    </script>
+
+    <button onclick="toggleDarkMode()" class="toggle-dark-mode-btn">Toggle Dark Mode</button>
 </body>
 </html>

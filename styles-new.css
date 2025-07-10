@@ -128,4 +128,4 @@ body.dark-mode th {
 /* Toggle button */
 .toggle-dark-mode-btn {
     position: fixed;
-    top: 30px; /* lower so it doesn't block your heading */
+    top: 5px; /* lower so it doesn't block your heading */

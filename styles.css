@@ -14,6 +14,7 @@ body {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: background 0.3s, color 0.3s;
 }
 
 h1 {
@@ -97,7 +98,29 @@ tr:hover {
     background: #f1f1f1;
 }
 
-/* ✅ DARK MODE styles */
+/* Button enhancements for add cash / reset */
+.setup button {
+    transition: background 0.3s, transform 0.2s;
+}
+.setup button:hover {
+    transform: translateY(-2px);
+}
+
+button[onclick*="resetAccount"] {
+    background: #e74c3c;
+}
+button[onclick*="resetAccount"]:hover {
+    background: #c0392b;
+}
+
+button[onclick*="addPettyCash"] {
+    background: #27ae60;
+}
+button[onclick*="addPettyCash"]:hover {
+    background: #1e8449;
+}
+
+/* Dark mode adjustments */
 body.dark-mode {
     background: #1e272e;
     color: #f5f6fa;
@@ -108,7 +131,7 @@ body.dark-mode .setup,
 body.dark-mode .summary, 
 body.dark-mode table {
     background: #2f3640;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    color: #f5f6fa;
 }
 
 body.dark-mode input,
@@ -118,12 +141,13 @@ body.dark-mode select {
     border: 1px solid #555;
 }
 
-body.dark-mode th, body.dark-mode td {
-    border-bottom: 1px solid #555;
+body.dark-mode th {
+    background: #3498db;
+    color: white;
 }
 
 body.dark-mode tr:hover {
-    background: #414141;
+    background: #3b3b3b;
 }
 
 @media (max-width: 600px) {

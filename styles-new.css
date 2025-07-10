@@ -1,4 +1,4 @@
-/* Reset some defaults */
+/* Reset defaults */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -59,6 +59,7 @@ button {
     border: none;
     cursor: pointer;
     font-size: 16px;
+    transition: background 0.3s;
 }
 
 button:hover {
@@ -132,9 +133,9 @@ body.dark-mode tr:hover {
 /* Toggle dark mode button */
 .toggle-dark-mode-btn {
     position: fixed;
-    top: 30px; /* ensures it doesn't block your heading */
-    right: 10px;
-    padding: 5px 10px;
+    top: 70px; /* further down to avoid blocking your h1 */
+    right: 20px;
+    padding: 10px 15px;
     border-radius: 6px;
     border: none;
     background: #3498db;

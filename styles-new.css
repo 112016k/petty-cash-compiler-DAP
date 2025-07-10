@@ -14,6 +14,7 @@ body {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: background 0.4s, color 0.4s;
 }
 
 h1 {
@@ -34,6 +35,7 @@ form, .setup {
     margin-bottom: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: background 0.4s, color 0.4s;
 }
 
 input, select, button {
@@ -80,6 +82,7 @@ table {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: background 0.4s, color 0.4s;
 }
 
 th, td {
@@ -97,18 +100,27 @@ tr:hover {
     background: #f1f1f1;
 }
 
-/* Add Cash and Reset styles */
-.addCashBtn {
-    background: #27ae60;
+/* Dark mode */
+body.dark-mode {
+    background: #1e272e;
+    color: #f5f6fa;
 }
 
-.addCashBtn:hover {
-    background: #1e8449;
+body.dark-mode form,
+body.dark-mode .setup,
+body.dark-mode .summary,
+body.dark-mode table {
+    background: #2f3640;
+    color: #f5f6fa;
 }
 
-.resetBtn {
-    background: #e74c3c;
+body.dark-mode input,
+body.dark-mode select {
+    background: #3d3d3d;
+    color: #f5f6fa;
+    border: 1px solid #555;
 }
 
-.resetBtn:hover {
-    b
+body.dark-mode th {
+    background: #40739e;
+}

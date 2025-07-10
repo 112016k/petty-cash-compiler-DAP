@@ -39,8 +39,6 @@
             <option value="">-- Select Type --</option>
             <option value="SERVICE">SERVICE</option>
             <option value="PREVENTIVE MAINTENANCE">PREVENTIVE MAINTENANCE</option>
-            <option value="CONVERTION">CONVERTION</option>
-            <option value="SETUP">SETUP</option>
         </select>
         <input type="text" id="location" placeholder="Where / Location" required />
         <input type="number" id="amount" placeholder="Amount" required />
@@ -58,8 +56,6 @@
         </thead>
         <tbody id="expenseTable"></tbody>
     </table>
-
-    <button onclick="toggleDarkMode()" class="toggle-dark-mode-btn">🌙</button>
 
     <script>
         let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
@@ -177,12 +173,6 @@
             document.getElementById('totalSpent').textContent = total.toFixed(2);
             document.getElementById('remaining').textContent = rem.toFixed(2);
         }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-        }
-        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
 
         function downloadCSV() {
             if (!currentAccount) return alert("Select an account first.");

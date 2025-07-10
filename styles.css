@@ -111,40 +111,4 @@ tr:hover {
 }
 
 .resetBtn:hover {
-    background: #c0392b;
-}
-
-/* Dark mode styles */
-body.dark-mode {
-    background: #1e272e;
-    color: #f5f6fa;
-}
-
-body.dark-mode form, 
-body.dark-mode .setup, 
-body.dark-mode .summary, 
-body.dark-mode table {
-    background: #2f3640;
-}
-
-body.dark-mode input,
-body.dark-mode select {
-    background: #3d3d3d;
-    color: #f5f6fa;
-    border: 1px solid #555;
-}
-
-body.dark-mode th {
-    background: #3498db;
-}
-
-body.dark-mode tr:hover {
-    background: #3a3a3a;
-}
-
-/* Responsive tweaks */
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-}
+    b

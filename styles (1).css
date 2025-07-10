@@ -1,0 +1,8 @@
+body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 0 10px; }
+h1 { text-align: center; }
+form, .setup { margin-bottom: 20px; }
+input, button { padding: 8px; margin: 5px 0; width: 100%; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background: #f4f4f4; }
+.summary { margin-top: 20px; font-size: 1.2em; }

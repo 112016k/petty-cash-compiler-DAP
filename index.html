@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Petty Cash Monitoring</title>
+    <title>Petty Cash Compiler - Multi Account</title>
     <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-    <h1>Petty Cash Monitoring</h1>
-    <p>Track expenses & balances for Phillogix,Ideasrv,Apsoft.</p>
+    <h1>Petty Cash Compiler</h1>
+    <p>Track expenses & balances for multiple petty cash accounts.</p>
 
     <div class="setup">
         <label>Select Account:</label>
@@ -26,6 +26,7 @@
 
     <div class="setup">
         <button onclick="addCashPrompt()">Add Cash to Account</button>
+        <button onclick="deductCashPrompt()">Deduct Cash from Account</button>
         <button onclick="deleteAccount()">Delete Account</button>
         <button onclick="resetAccount()">Reset Account</button>
         <button onclick="resetRecent()">Reset Only Expenses</button>
@@ -38,8 +39,6 @@
         <select id="serviceType" required>
             <option value="">-- Select Type --</option>
             <option value="SERVICE">SERVICE</option>
-            <option value="CONVERSION">CONVERSION</option>
-            <option value="SETUP">SETUP</option>
             <option value="PREVENTIVE MAINTENANCE">PREVENTIVE MAINTENANCE</option>
         </select>
         <input type="text" id="location" placeholder="Where / Location" required />
@@ -59,135 +58,144 @@
         <tbody id="expenseTable"></tbody>
     </table>
 
-    <script>
-        let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
-        let currentAccount = null;
+<script>
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+    let currentAccount = null;
 
-        window.onload = loadAccountOptions;
-        function save() {
-            localStorage.setItem('accounts', JSON.stringify(accounts));
+    window.onload = loadAccountOptions;
+    function save() {
+        localStorage.setItem('accounts', JSON.stringify(accounts));
+    }
+
+    function loadAccountOptions() {
+        const select = document.getElementById('accountSelect');
+        select.innerHTML = '<option value="">-- Select Account --</option>';
+        for (let name in accounts) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
         }
-
-        function loadAccountOptions() {
-            const select = document.getElementById('accountSelect');
-            select.innerHTML = '<option value="">-- Select Account --</option>';
-            for (let name in accounts) {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                select.appendChild(option);
-            }
-            if (currentAccount && accounts[currentAccount]) {
-                select.value = currentAccount;
-                updateUI();
-            }
-        }
-
-        function createAccount() {
-            const name = document.getElementById('newAccountName').value.trim();
-            const cash = parseFloat(document.getElementById('newAccountCash').value);
-            if (!name || isNaN(cash)) return alert('Enter valid account name and cash.');
-            if (accounts[name]) return alert('Account already exists.');
-            accounts[name] = { startingCash: cash, expenses: [] };
-            save(); currentAccount = name;
-            loadAccountOptions();
-            document.getElementById('accountSelect').value = name;
+        if (currentAccount && accounts[currentAccount]) {
+            select.value = currentAccount;
             updateUI();
-            document.getElementById('newAccountName').value = '';
-            document.getElementById('newAccountCash').value = '';
         }
+    }
 
-        function switchAccount() {
-            const selected = document.getElementById('accountSelect').value;
-            if (selected && accounts[selected]) {
-                currentAccount = selected; updateUI();
-            } else { currentAccount = null; clearUI(); }
-        }
+    function createAccount() {
+        const name = document.getElementById('newAccountName').value.trim();
+        const cash = parseFloat(document.getElementById('newAccountCash').value);
+        if (!name || isNaN(cash)) return alert('Enter valid account name and cash.');
+        if (accounts[name]) return alert('Account already exists.');
+        accounts[name] = { startingCash: cash, expenses: [] };
+        save(); currentAccount = name;
+        loadAccountOptions();
+        document.getElementById('accountSelect').value = name;
+        updateUI();
+        document.getElementById('newAccountName').value = '';
+        document.getElementById('newAccountCash').value = '';
+    }
 
-        function addCashPrompt() {
-            if (!currentAccount) return alert('Select an account first.');
-            const amount = parseFloat(prompt("Enter cash to add:", "0"));
-            if (!isNaN(amount)) {
-                accounts[currentAccount].startingCash += amount;
-                save(); updateUI();
-            }
-        }
+    function switchAccount() {
+        const selected = document.getElementById('accountSelect').value;
+        if (selected && accounts[selected]) {
+            currentAccount = selected; updateUI();
+        } else { currentAccount = null; clearUI(); }
+    }
 
-        function deleteAccount() {
-            if (!currentAccount) return alert('Select an account first.');
-            if (confirm(`Delete account ${currentAccount}?`)) {
-                delete accounts[currentAccount];
-                save(); currentAccount = null;
-                loadAccountOptions(); clearUI();
-            }
+    function addCashPrompt() {
+        if (!currentAccount) return alert('Select an account first.');
+        const amount = parseFloat(prompt("Enter cash to add:", "0"));
+        if (!isNaN(amount)) {
+            accounts[currentAccount].startingCash += amount;
+            save(); updateUI();
         }
+    }
 
-        function resetAccount() {
-            if (!currentAccount) return alert('Select an account first.');
-            if (confirm(`Reset account ${currentAccount} completely?`)) {
-                accounts[currentAccount] = { startingCash: 0, expenses: [] };
-                save(); updateUI();
-            }
+    function deductCashPrompt() {
+        if (!currentAccount) return alert('Select an account first.');
+        const amount = parseFloat(prompt("Enter amount to deduct:", "0"));
+        if (!isNaN(amount)) {
+            accounts[currentAccount].startingCash -= amount;
+            save(); updateUI();
         }
+    }
 
-        function resetRecent() {
-            if (!currentAccount) return alert('Select an account first.');
-            if (confirm(`Reset only expenses for ${currentAccount}?`)) {
-                accounts[currentAccount].expenses = [];
-                save(); updateUI();
-            }
+    function deleteAccount() {
+        if (!currentAccount) return alert('Select an account first.');
+        if (confirm(`Delete account ${currentAccount}?`)) {
+            delete accounts[currentAccount];
+            save(); currentAccount = null;
+            loadAccountOptions(); clearUI();
         }
+    }
 
-        function addExpense(e) {
-            e.preventDefault();
-            if (!currentAccount) return alert('Select an account first.');
-            const date = document.getElementById('date').value;
-            const type = document.getElementById('serviceType').value;
-            const location = document.getElementById('location').value.trim();
-            const amount = parseFloat(document.getElementById('amount').value);
-            if (!date || !type || !location || isNaN(amount)) return alert('Fill all fields correctly.');
-            const description = `${type} - ${location}`;
-            accounts[currentAccount].expenses.push({ date, description, amount });
-            save(); updateUI(); e.target.reset();
+    function resetAccount() {
+        if (!currentAccount) return alert('Select an account first.');
+        if (confirm(`Reset account ${currentAccount} completely?`)) {
+            accounts[currentAccount] = { startingCash: 0, expenses: [] };
+            save(); updateUI();
         }
+    }
 
-        function updateUI() {
-            updateTable(); updateSummary();
+    function resetRecent() {
+        if (!currentAccount) return alert('Select an account first.');
+        if (confirm(`Reset only expenses for ${currentAccount}?`)) {
+            accounts[currentAccount].expenses = [];
+            save(); updateUI();
         }
+    }
 
-        function clearUI() {
-            document.getElementById('expenseTable').innerHTML = '';
-            document.getElementById('totalSpent').textContent = '0.00';
-            document.getElementById('remaining').textContent = '0.00';
-        }
+    function addExpense(e) {
+        e.preventDefault();
+        if (!currentAccount) return alert('Select an account first.');
+        const date = document.getElementById('date').value;
+        const type = document.getElementById('serviceType').value;
+        const location = document.getElementById('location').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+        if (!date || !type || !location || isNaN(amount)) return alert('Fill all fields correctly.');
+        const description = `${type} - ${location}`;
+        accounts[currentAccount].expenses.push({ date, description, amount });
+        save(); updateUI(); e.target.reset();
+    }
 
-        function updateTable() {
-            const tbody = document.getElementById('expenseTable');
-            tbody.innerHTML = '';
-            accounts[currentAccount].expenses.forEach(exp => {
-                tbody.innerHTML += `<tr><td>${exp.date}</td><td>${exp.description}</td><td>₱${exp.amount.toFixed(2)}</td></tr>`;
-            });
-        }
+    function updateUI() {
+        updateTable(); updateSummary();
+    }
 
-        function updateSummary() {
-            const total = accounts[currentAccount].expenses.reduce((sum, e) => sum + e.amount, 0);
-            const rem = accounts[currentAccount].startingCash - total;
-            document.getElementById('totalSpent').textContent = total.toFixed(2);
-            document.getElementById('remaining').textContent = rem.toFixed(2);
-        }
+    function clearUI() {
+        document.getElementById('expenseTable').innerHTML = '';
+        document.getElementById('totalSpent').textContent = '0.00';
+        document.getElementById('remaining').textContent = '0.00';
+    }
 
-        function downloadCSV() {
-            if (!currentAccount) return alert("Select an account first.");
-            const rows = [["Date","Description","Amount"]];
-            accounts[currentAccount].expenses.forEach(e => rows.push([e.date, e.description, e.amount]));
-            let csv = rows.map(r => r.join(",")).join("\n");
-            let blob = new Blob([csv], {type: "text/csv"});
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement("a");
-            a.href = url; a.download = `${currentAccount}_expenses.csv`;
-            document.body.appendChild(a); a.click();
-            document.body.removeChild(a);
-        }
-    </script>
+    function updateTable() {
+        const tbody = document.getElementById('expenseTable');
+        tbody.innerHTML = '';
+        accounts[currentAccount].expenses.forEach(exp => {
+            tbody.innerHTML += `<tr><td>${exp.date}</td><td>${exp.description}</td><td>₱${exp.amount.toFixed(2)}</td></tr>`;
+        });
+    }
+
+    function updateSummary() {
+        const total = accounts[currentAccount].expenses.reduce((sum, e) => sum + e.amount, 0);
+        const rem = accounts[currentAccount].startingCash - total;
+        document.getElementById('totalSpent').textContent = total.toFixed(2);
+        document.getElementById('remaining').textContent = rem.toFixed(2);
+    }
+
+    function downloadCSV() {
+        if (!currentAccount) return alert("Select an account first.");
+        const rows = [["Date","Description","Amount"]];
+        accounts[currentAccount].expenses.forEach(e => rows.push([e.date, e.description, e.amount]));
+        let csv = rows.map(r => r.join(",")).join("\n");
+        let blob = new Blob([csv], {type: "text/csv"});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement("a");
+        a.href = url; a.download = `${currentAccount}_expenses.csv`;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+    }
+</script>
 </body>
 </html>
